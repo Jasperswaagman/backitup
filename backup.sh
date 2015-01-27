@@ -22,6 +22,15 @@ search_cronjob() {
     fi
 }
 
+new_crontab() {
+    if $(! crontab -l); then
+        export EDITOR=vi
+        crontab -e <<EOF
+            ^]:wq
+EOF
+    fi
+}
+
 set_bandwidth() {
     echo -e "Checking your bandwidth..."
     if [ ! -f speed ]; then
@@ -33,14 +42,6 @@ set_bandwidth() {
 }
 
 set_cronjob() {
-    if $(! crontab -l); then
-        export EDITOR=vi
-        $(crontab -e <<EOF
-            ^]:wq
-        EOF
-        )
-    fi
-
     echo -e "Creating cronjob for: ""$dir_to_backup"
     set_bandwidth
     crontab -l > /tmp/mycron
@@ -54,6 +55,9 @@ set_cronjob() {
 }
 
 what_to_backup() {
+    # First we make sure there is an existing crontab for the current user
+    new_crontab
+    
     # What to backup
     echo "Possible directories you can back-up:"
     local arr=(); local i=0
