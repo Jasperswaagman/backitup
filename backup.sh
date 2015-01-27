@@ -92,7 +92,6 @@ what_to_backup() {
     return 1
 } 
 
-exit
 if what_to_backup; then
    set_cronjob 
 else 
