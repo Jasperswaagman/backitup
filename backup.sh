@@ -38,7 +38,7 @@ set_bandwidth() {
         wget -O /dev/null "$speedtest" 2>speed  # Write the download to the speed file
     fi
     bandwidth=$(tail -n1 speed | egrep -o "\((\d+).+\)" | cut -c 2-3)    # Get the bandwidth in MB
-    let bandwidth="$bandwidth * 7000"   # We don't want to take all the bandwidth, so *7 instead of *8 to Kbytes
+    bandwidth=$(($bandwidth * 7000))   # We don't want to take all the bandwidth, so *7 instead of *8 to Kbytes
     echo -e "Your bandwith is set to: $bandwidth bytes"
 }
 
@@ -92,6 +92,7 @@ what_to_backup() {
     return 1
 } 
 
+exit
 if what_to_backup; then
    set_cronjob 
 else 
