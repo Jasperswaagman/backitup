@@ -33,6 +33,14 @@ set_bandwidth() {
 }
 
 set_cronjob() {
+    if $(! crontab -l); then
+        export EDITOR=vi
+        $(crontab -e <<EOF
+            ^]:wq
+        EOF
+        )
+    fi
+
     echo -e "Creating cronjob for: ""$dir_to_backup"
     set_bandwidth
     crontab -l > /tmp/mycron
