@@ -32,7 +32,7 @@ set_bandwidth() {
     echo -e "Your bandwith is set to: $bandwidth bytes"
 }
 
-create_cronjob() {
+set_cronjob() {
     echo -e "Creating cronjob for: ""$dir_to_backup"
     set_bandwidth
     crontab -l > /tmp/mycron
@@ -80,7 +80,7 @@ what_to_backup() {
 } 
 
 if what_to_backup; then
-    create_cronjob
+   set_cronjob 
 else 
     echo -e "You did something wrong!"
 fi
