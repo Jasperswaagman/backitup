@@ -24,6 +24,7 @@ search_cronjob() {
 
 new_crontab() {
     if $(! crontab -l); then
+        echo -e "Creating a crontab for you..."
         export EDITOR=vi
         crontab -e <<EOF
             dG:wq!
@@ -56,7 +57,7 @@ set_cronjob() {
 
 what_to_backup() {
     # First we make sure there is an existing crontab for the current user
-    new_crontab
+    new_crontab &> /dev/null    # Hide outpout of vi
     
     # What to backup
     echo "Possible directories you can back-up:"
