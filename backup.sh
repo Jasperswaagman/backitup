@@ -26,7 +26,7 @@ new_crontab() {
     if $(! crontab -l); then
         export EDITOR=vi
         crontab -e <<EOF
-            ^]:wq
+            dG:wq!
 EOF
     fi
 }
