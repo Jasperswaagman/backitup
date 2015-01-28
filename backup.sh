@@ -6,8 +6,8 @@
 #   * Make it iterative so users can add more cronjobs at once
 
 # what to backup and to which daemon
-BACKUPPED_DIR_ROOT=         # Has to be in the form of /foo
-BACKUP_DAEMON=              # Can be a host in the form of host:/dir
+BACKUPPED_DIR_ROOT=     # Has to be in the form of /foo
+BACKUP_DAEMON=          # Can be a host in the form of host:/dir
 
 # Cron patterns
 cron_daily="30 2 * * *"                 # Every day at 02:30
@@ -95,7 +95,7 @@ what_to_backup() {
     return 1
 } 
 
-if [ $BACKUPPED_DIR_ROOT -eq "" ] || [ $BACKUP_DAEMON -eq "" ]; then
+if [[ "$BACKUPPED_DIR_ROOT" == "" ]] || [[ "$BACKUP_DAEMON" == "" ]]; then
     echo -e "To make use of this script you have to set the following variables, BACKUPPED_DIR_ROOT and BACKUP_DAEMON"
     exit
 fi
