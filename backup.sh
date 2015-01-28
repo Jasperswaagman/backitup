@@ -1,9 +1,13 @@
 #!/bin/bash
 
 # Write backups to a remote host with rsync
+# Maintainer: j.swaagman@peperzaken.nl
+# Todo:
+#   * Make it iterative so users can add more cronjobs at once
 
-BACKUPPED_DIR_ROOT=foobar   # Has to be in the form of /foo
-BACKUP_SERVER=barfoo        # Can be a host in the form of host:/dir
+# what to backup and to which daemon
+BACKUPPED_DIR_ROOT=         # Has to be in the form of /foo
+BACKUP_DAEMON=              # Can be a host in the form of host:/dir
 
 # Cron patterns
 cron_daily="30 2 * * *"                 # Every day at 02:30
@@ -17,14 +21,11 @@ search_cronjob() {
     if $(crontab -l | grep -qw "$1"); then
         # Already has a back-up
         return 1
-    else 
-        return 0
     fi
 }
 
 new_crontab() {
     if $(! crontab -l); then
-        echo -e "Creating a crontab for you..."
         export EDITOR=vi
         crontab -e <<EOF
             dG:wq!
@@ -37,7 +38,7 @@ set_bandwidth() {
     if [ ! -f speed ]; then
         wget -O /dev/null "$speedtest" 2>speed  # Write the download to the speed file
     fi
-    bandwidth=$(tail -n1 speed | egrep -o "\((\d+).+\)" | cut -c 2-3)    # Get the bandwidth in MB
+    bandwidth=$(tail -n1 speed | head -n1 | perl -pe 's/.*\((\d+).+\).*/\1/p')    # Get the bandwidth in MB
     bandwidth=$(($bandwidth * 7000))   # We don't want to take all the bandwidth, so *7 instead of *8 to Kbytes
     echo -e "Your bandwith is set to: $bandwidth bytes"
 }
@@ -46,7 +47,7 @@ set_cronjob() {
     echo -e "Creating cronjob for: ""$dir_to_backup"
     set_bandwidth
     crontab -l > /tmp/mycron
-    echo "$cron_time"" rsync -zv --max-bandwidth=$bandwidth "$BACKUPPED_DIR_ROOT"/"$dir_to_backup" "$BACKUP_SERVER"" >> /tmp/mycron
+    echo "$cron_time"" rsync -zav --bwlimit=$bandwidth "$BACKUPPED_DIR_ROOT"/"$dir_to_backup" "$BACKUP_DAEMON" | logger -t BACKUP" >> /tmp/mycron
     if crontab /tmp/mycron; then
         echo -e "Cronjob added!"
     else 
@@ -57,7 +58,9 @@ set_cronjob() {
 
 what_to_backup() {
     # First we make sure there is an existing crontab for the current user
+    echo -e "Creating a crontab for you..."
     new_crontab &> /dev/null    # Hide outpout of vi
+    echo -e "Done, now let's set up your backup job\n"
     
     # What to backup
     echo "Possible directories you can back-up:"
@@ -91,6 +94,11 @@ what_to_backup() {
     # No valid values
     return 1
 } 
+
+if [ $BACKUPPED_DIR_ROOT -eq "" ] || [ $BACKUP_DAEMON -eq "" ]; then
+    echo -e "To make use of this script you have to set the following variables, BACKUPPED_DIR_ROOT and BACKUP_DAEMON"
+    exit
+fi
 
 if what_to_backup; then
    set_cronjob 
