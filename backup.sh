@@ -7,7 +7,7 @@
 
 # what to backup and to which daemon
 BACKUPPED_DIR_ROOT=     # Has to be in the form of /foo
-BACKUP_DAEMON=          # Can be a host in the form of host:/dir
+BACKUP_DAEMON=          # Can be a host in the form of host::module, host:/dir
 
 # Cron patterns
 cron_daily="30 2 * * *"                 # Every day at 02:30
@@ -47,7 +47,10 @@ set_cronjob() {
     echo -e "Creating cronjob for: ""$dir_to_backup"
     set_bandwidth
     crontab -l > /tmp/mycron
-    echo "$cron_time"" rsync -zav --bwlimit=$bandwidth "$BACKUPPED_DIR_ROOT"/"$dir_to_backup" "$BACKUP_DAEMON" | logger -t BACKUP" >> /tmp/mycron
+    echo "$cron_time"" rsync \ 
+        -zav \
+        --bwlimit="$bandwidth" \
+        -e "ssh -l rsyncd -i /home/rsyncd/.ssh/id_rsa" "$BACKUPPED_DIR_ROOT"/"$dir_to_backup" "$BACKUP_DAEMON" | logger -t BACKUP" >> /tmp/mycron   # Check for the correct user
     if crontab /tmp/mycron; then
         echo -e "Cronjob added!"
     else 
