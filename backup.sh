@@ -7,7 +7,9 @@
 
 # what to backup and to which daemon
 BACKUPPED_DIR_ROOT=     # Has to be in the form of /foo
-BACKUP_DAEMON=          # Can be a host in the form of host::module, host:/dir
+
+# Can be a host in the form of host::module, host:/dir
+BACKUP_DAEMON= # backup.peperzaken.nl::backup
 
 # Cron patterns
 cron_daily="30 2 * * *"                 # Every day at 02:30
