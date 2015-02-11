@@ -49,7 +49,7 @@ set_cronjob() {
     set_bandwidth
     echo -e "Creating cronjob for: ""$dir_to_backup"
     crontab -l > /tmp/mycron
-    echo "$cron_time" "rsync -zav --bwlimit="$bandwidth" -e "ssh -l rsyncd -i /home/rsyncd/.ssh/id_rsa" "$BACKUPPED_DIR_ROOT"/"$dir_to_backup" "$BACKUP_DAEMON" | logger -t BACKUP" >> /tmp/mycron
+    echo "$cron_time" "rsync -zav -e '"trickle -d "$bandwidth" ssh"' -e '"ssh -l rsyncd -i /home/rsyncd/.ssh/id_rsa"' "$BACKUPPED_DIR_ROOT"/"$dir_to_backup" "$BACKUP_DAEMON" | logger -t BACKUP" >> /tmp/mycron
     if crontab /tmp/mycron; then
         echo -e "Cronjob added!"
     else 
@@ -97,16 +97,30 @@ what_to_backup() {
     return 1
 } 
 
+# Check for root
 if [ "$EUID" -ne 0 ]; then
     echo -e "You must be root\n"
     exit 1
 fi
 
+# Check if vars are set. (Perhaps make this interactive?)
 if [[ "$BACKUPPED_DIR_ROOT" == "" ]] || [[ "$BACKUP_DAEMON" == "" ]]; then
     echo -e "To make use of this script you have to set the following variables, BACKUPPED_DIR_ROOT and BACKUP_DAEMON"
     exit
 fi
 
+# Install Trickle to manage our bandwidth
+if $(dpkg -l | grep trickle); then
+    echo -e "You already have Trickle installed, awesome! Let's continue"
+else 
+    echo -e "We are going to install Trickle for you, this will let us truly limit our bandwidth speed"
+    echo -e "Installing."
+    apt-get update > /dev/null
+    echo -en "."
+    apt-get install -y trickle > /dev/null
+fi
+
+# Run the main thingy
 if what_to_backup; then
    set_cronjob 
 else 
