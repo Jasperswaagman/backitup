@@ -49,11 +49,7 @@ set_cronjob() {
     set_bandwidth
     echo -e "Creating cronjob for: ""$dir_to_backup"
     crontab -l > /tmp/mycron
-    cat > /tmp/mycron << EOF $cron_time rsync \ 
-        -zav \
-        --bwlimit=$bandwidth \
-        -e "ssh -l rsyncd -i /home/rsyncd/.ssh/id_rsa" $BACKUPPED_DIR_ROOT/$dir_to_backup $BACKUP_DAEMON | logger -t BACKUP
-EOF
+    echo "$cron_time" "rsync -zav --bwlimit="$bandwidth" -e "ssh -l rsyncd -i /home/rsyncd/.ssh/id_rsa" "$BACKUPPED_DIR_ROOT"/"$dir_to_backup" "$BACKUP_DAEMON" | logger -t BACKUP" >> /tmp/mycron
     if crontab /tmp/mycron; then
         echo -e "Cronjob added!"
     else 
