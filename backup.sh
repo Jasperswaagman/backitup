@@ -5,7 +5,7 @@
 # Todo:
 #   * Make it iterative so users can add more cronjobs at once
 
-# what to backup and to which daemon
+# The files/directories to backup
 BACKUPPED_DIR_ROOT=     # Has to be in the form of /foo
 
 # Can be a host in the form of host::module, host:/dir
@@ -115,9 +115,9 @@ if $(dpkg -l | grep trickle); then
 else 
     echo -e "We are going to install Trickle for you, this will let us truly limit our bandwidth speed"
     echo -e "Installing."
-    apt-get update > /dev/null
+    apt-get update # > /dev/null
     echo -en "."
-    apt-get install -y trickle > /dev/null
+    apt-get install -y trickle # > /dev/null
 fi
 
 # Run the main thingy
