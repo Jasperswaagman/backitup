@@ -115,9 +115,9 @@ if $(dpkg -l | grep trickle); then
 else 
     echo -e "We are going to install Trickle for you, this will let us truly limit our bandwidth speed"
     echo -e "Installing."
-    apt-get update # > /dev/null
+    apt-get update  > /dev/null
     echo -en "."
-    apt-get install -y trickle # > /dev/null
+    apt-get install -y trickle > /dev/null
 fi
 
 # Run the main thingy
