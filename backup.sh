@@ -109,7 +109,7 @@ if [[ "$BACKUPPED_DIR_ROOT" == "" ]] || [[ "$BACKUP_DAEMON" == "" ]]; then
 fi
 
 # Install Trickle to manage our bandwidth
-if dpkg -l trickle; then
+if dpkg -l trickle > /dev/null; then
     echo -e "You already have Trickle installed, awesome! Let's continue"
 else 
     echo -e "We are going to install Trickle for you, this will let us truly limit our bandwidth speed"
