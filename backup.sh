@@ -41,7 +41,7 @@ set_bandwidth() {
         wget -O /dev/null "$speedtest" 2>speed  # Write the download to the speed file
     fi
     bandwidth=$(tail -n2 speed | head -n1 | perl -pe 's/.*\((\d+).+\).*/\1/p')    # Get the bandwidth in MB
-    bandwidth=$(($bandwidth * 7000))   # We don't want to take all the bandwidth, so *7 instead of *8 to Kbytes
+    bandwidth=$(($bandwidth * 900))   # We don't want to take all the bandwidth, so instead of 1024 we use 900, to converse to KBytes
     echo -e "Your bandwith is set to: $bandwidth bytes"
 }
 
@@ -98,7 +98,7 @@ what_to_backup() {
 } 
 
 if [ "$EUID" -ne 0 ]; then
-    echo "You must be root\n"
+    echo -e "You must be root\n"
     exit 1
 fi
 
