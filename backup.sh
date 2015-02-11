@@ -97,7 +97,7 @@ what_to_backup() {
     return 1
 } 
 
-if $(whoami != root); then
+if $(whoami != "root"); then
     echo "You must be root\n"
     exit 1
 fi
