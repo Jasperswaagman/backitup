@@ -97,6 +97,11 @@ what_to_backup() {
     return 1
 } 
 
+if $(whoami != root); then
+    echo "You must be root\n"
+    exit 1
+fi
+
 if [[ "$BACKUPPED_DIR_ROOT" == "" ]] || [[ "$BACKUP_DAEMON" == "" ]]; then
     echo -e "To make use of this script you have to set the following variables, BACKUPPED_DIR_ROOT and BACKUP_DAEMON"
     exit
