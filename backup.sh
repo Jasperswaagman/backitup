@@ -29,7 +29,7 @@ search_cronjob() {
 new_crontab() {
     if $(! crontab -l); then
         export EDITOR=vi
-        crontab -e <<EOF
+        crontab -e << EOF
             dG:wq!
 EOF
     fi
@@ -49,10 +49,11 @@ set_cronjob() {
     set_bandwidth
     echo -e "Creating cronjob for: ""$dir_to_backup"
     crontab -l > /tmp/mycron
-    echo "$cron_time" "rsync \ 
+    cat > /tmp/mycron << EOF "$cron_time" "rsync \ 
         -zav \
         --bwlimit="$bandwidth" \
-        -e "ssh -l rsyncd -i /home/rsyncd/.ssh/id_rsa" "$BACKUPPED_DIR_ROOT"/"$dir_to_backup" "$BACKUP_DAEMON" | logger -t BACKUP" >> /tmp/mycron   # Check for the correct user
+        -e "ssh -l rsyncd -i /home/rsyncd/.ssh/id_rsa" "$BACKUPPED_DIR_ROOT"/"$dir_to_backup" "$BACKUP_DAEMON" | logger -t BACKUP"
+EOF
     if crontab /tmp/mycron; then
         echo -e "Cronjob added!"
     else 
@@ -63,7 +64,7 @@ set_cronjob() {
 
 what_to_backup() {
     # First we make sure there is an existing crontab for the current user
-    echo -e "Creating a crontab for you..."
+    echo -e "\nCreating a crontab for you..."
     new_crontab &> /dev/null    # Hide outpout of vi
     echo -e "Done, now let's set up your backup job\n"
     
