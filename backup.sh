@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/bin/bash 
 # Write backups to a remote host with rsync
 # Maintainer: j.swaagman@peperzaken.nl
 # Todo:
@@ -110,7 +109,7 @@ if [[ "$BACKUPPED_DIR_ROOT" == "" ]] || [[ "$BACKUP_DAEMON" == "" ]]; then
 fi
 
 # Install Trickle to manage our bandwidth
-if $(dpkg -l | grep trickle); then
+if dpkg -l trickle; then
     echo -e "You already have Trickle installed, awesome! Let's continue"
 else 
     echo -e "We are going to install Trickle for you, this will let us truly limit our bandwidth speed"
