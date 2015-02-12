@@ -14,7 +14,6 @@ sudo adduser rysncd
 After this, follow the steps of the **Foreach localhost** part of the [guide][guide]
 
 ## Usage
-
 ### First use
 To make use of the script, one has to fill in these two variables:
 ```bash
