@@ -113,10 +113,11 @@ if dpkg -l trickle > /dev/null; then
     echo -e "You already have Trickle installed, awesome! Let's continue"
 else 
     echo -e "We are going to install Trickle for you, this will let us truly limit our bandwidth speed"
-    echo -e "Installing."
+    echo -en "Installing."
     apt-get update  > /dev/null
-    echo -en "."
+    echo -e "."
     apt-get install -y trickle > /dev/null
+    echo -e "."
 fi
 
 # Run the main thingy
