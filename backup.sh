@@ -5,12 +5,17 @@
 #   * Make it iterative so users can add more cronjobs at once
 
 # The files/directories to backup
-BACKUPPED_DIR_ROOT=     # Has to be in the form of /foo
-
-# Can be a host in the form of host::module, host:/dir
-BACKUP_DAEMON= # backup.peperzaken.nl::backup
+BACKUPPED_DIR_ROOT=     # The directory which contains all the dirs/files you want to backup
+BACKUP_DAEMON=          # The server where you store your backups. Can be a host in the form of: host::module, host:/dir
 
 # Cron patterns
+# +--------- Minute (0-59)                    | Output Dumper: >/dev/null 2>&1
+# | +------- Hour (0-23)                      | Multiple Values Use Commas: 3,12,47
+# | | +----- Day Of Month (1-31)              | Do every X intervals: */X  -> Example: */15 * * * *  Is every 15 minutes
+# | | | +--- Month (1 -12)                    | Aliases: @reboot -> Run once at startup; @hourly -> 0 * * * *;
+# | | | | +- Day Of Week (0-6) (Sunday = 0)   | @daily -> 0 0 * * *; @weekly -> 0 0 * * 0; @monthly ->0 0 1 * *;
+# | | | | |                                   | @yearly -> 0 0 1 1 *; # * * * * *
+# * * * * *
 cron_daily="30 2 * * *"                 # Every day at 02:30
 cron_every_other_day="30 2 1-31/2 * *"  # Every other day at 02:30
 cron_weekly="30 2 * * 6"                # Every Saturday at 02:30
