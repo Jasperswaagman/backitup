@@ -47,21 +47,21 @@ while getopts ":d:b:" opts; do
 done
 shift $((OPTIND-1))
 
-if [ -z "${d}" ] || [ -z "${b}" ]; then
+if [ -z "${BACKUPPED_DIR_ROOT}" ] || [ -z "${BACKUP_DAEMON}" ]; then
     usage
 fi
 
 search_cronjob() {
-    if $(crontab -l | grep -qw "$1"); then
+    if $(crontab -u rsyncd -l | grep -qw "$1"); then
         # Already has a back-up
         return 1
     fi
 }
 
 new_crontab() {
-    if $(! crontab -l); then
+    if $(! crontab -u rsyncd -l); then
         export EDITOR=vi
-        crontab -e << EOF
+        crontab -u rsyncd -e << EOF
             dG:wq!
 EOF
     fi
@@ -74,15 +74,15 @@ set_bandwidth() {
     fi
     bandwidth=$(tail -n2 speed | head -n1 | perl -pe 's/.*\((\d+).+\).*/\1/p')    # Get the bandwidth in MB
     bandwidth=$(($bandwidth * 900))   # We don't want to take all the bandwidth, so instead of 1024 we use 900, to converse to KBytes
-    echo -e "Your bandwith is set to: $bandwidth bytes"
+    echo -e "Your bandwith is set to: $bandwidth Kbytes"
 }
 
 set_cronjob() {
     set_bandwidth
     echo -e "Creating cronjob for: ""$dir_to_backup"
-    crontab -l > /tmp/mycron
-    echo "$cron_time" "rsync -zav -e '"trickle -d "$bandwidth" ssh"' -e '"ssh -l rsyncd -i /home/rsyncd/.ssh/id_rsa"' "$BACKUPPED_DIR_ROOT"/"$dir_to_backup" "$BACKUP_DAEMON" | logger -t BACKUP" >> /tmp/mycron
-    if crontab /tmp/mycron; then
+    crontab -u rsyncd -l > /tmp/mycron
+    echo "$cron_time" "rsync -zav -e '"trickle -d "$bandwidth" ssh"' -e '"ssh -l rsyncd -i /home/rsyncd/.ssh/id_rsa"' "$BACKUPPED_DIR_ROOT""$dir_to_backup" "$BACKUP_DAEMON" | logger -t BACKUP" >> /tmp/mycron
+    if crontab -u rsyncd /tmp/mycron; then
         echo -e "Cronjob added!"
     else 
         echo -e "Could not create cronjob"
@@ -92,10 +92,9 @@ set_cronjob() {
 
 what_to_backup() {
     # First we make sure there is an existing crontab for the current user
-    echo -e "\nCreating a crontab for you..."
-    new_crontab &> /dev/null    # Hide outpout of vi
-    echo -e "Done, now let's set up your backup job\n"
-    
+    echo -e "\nCreating a crontab if needed, this might take a few seconds.."
+    new_crontab > /dev/null
+
     # What to backup
     echo "Possible directories you can back-up:"
     local arr=(); local i=0
@@ -106,9 +105,15 @@ what_to_backup() {
             ((i++))
         fi
     done
-    echo -n "Which directory do you want to back-up?: "
+    echo -n "Which directory do you want to back-up? [0-"$(($i-1))"]: "
     read dir
-    dir_to_backup=${arr[$dir]}
+    
+    if [ "$dir" -lt "$i" ]; then
+    	dir_to_backup=${arr[$dir]}
+    else 
+	echo -e "Don't try to cheat the system, that number is not valid!"
+	exit 1
+    fi
 
     # How often
     echo -en "\n[0] - Every day\n[1] - Every other day\n[2] - Every saturday\nHow often do you want it to back-up [0]: "
@@ -129,12 +134,6 @@ what_to_backup() {
     return 1
 } 
 
-# Check if vars are set. (Perhaps make this interactive?)
-#if [[ "$BACKUPPED_DIR_ROOT" == "" ]] || [[ "$BACKUP_DAEMON" == "" ]]; then
-#    echo -e "To make use of this script you have to set the following variables, BACKUPPED_DIR_ROOT and BACKUP_DAEMON"
-#    exit
-#fi
-
 # Install Trickle to manage our bandwidth
 if dpkg -l trickle > /dev/null; then
     echo -e "You already have Trickle installed, awesome! Let's continue"
@@ -147,9 +146,17 @@ else
     echo -e "."
 fi
 
-# Run the main thingy
-if what_to_backup; then
-   set_cronjob 
-else 
-    echo -e "You did something wrong!"
-fi
+run=0
+while [ "$run" -eq 0 ]; do
+	# Run the main thingy
+	if what_to_backup; then
+	   set_cronjob
+	   echo -en "Do you want to backup more? [y|N]: "
+	   read input; input="${input:=n}"
+	   if [ "$input" == "n" ]; then
+		run=1	
+	   fi
+	else 
+	    echo -e "You did something wrong!"
+	fi
+done
