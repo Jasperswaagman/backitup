@@ -26,23 +26,30 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 usage() { 
-    echo "Usage: "$0" [-d </dir/which/containsthefilesyouwanttobackup>] [-b <host::module> | <host:/dir> (Server you want to backup to)]" 1>&2
+    echo -e "Usage: "$0" -d /your/dir -b host:module\n\noptions:\n  -d directory which contains the files you want to backup\n  -b Server ip/domain where you want rsync to send the files to. for :module see 'man rsync'" 1>&2
     exit 1;
 }
 
 while getopts ":d:b:" opts; do
-    case "$opts" in
+    case "${opts}" in
         d) 
-            BACKUPPED_DIR_ROOT="$OPTARG"     # The directory which contains all the dirs/files you want to backup
-            ;;
+	    # The directory which contains all the dirs/files you want to backup
+            BACKUPPED_DIR_ROOT=${OPTARG}
+	    ;;
         b)
-            BACKUP_DAEMON="$OPTARG"          # The server where you store your backups. Can be a host in the form of: host::module, host:/dir
-            ;;
+	    # The server where you store your backups. Can be a host in the form of: host::module, host:/dir
+            BACKUP_DAEMON=${OPTARG}            
+	    ;;
         *)
             usage
             ;;
     esac
 done
+shift $((OPTIND-1))
+
+if [ -z "${d}" ] || [ -z "${b}" ]; then
+    usage
+fi
 
 search_cronjob() {
     if $(crontab -l | grep -qw "$1"); then
