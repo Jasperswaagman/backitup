@@ -93,7 +93,7 @@ set_cronjob() {
 what_to_backup() {
     # First we make sure there is an existing crontab for the current user
     echo -e "\nCreating a crontab if needed, this might take a few seconds.."
-    new_crontab > /dev/null
+    new_crontab >/dev/null 2>&1
 
     # What to backup
     echo "Possible directories you can back-up:"
