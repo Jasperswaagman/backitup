@@ -1,9 +1,10 @@
 #!/bin/bash 
 # Write backups to a remote host with rsync
 # Maintainer: j.swaagman@peperzaken.nl
-# Todo:
-#   * Make it iterative so users can add more cronjobs at once
 
+# =============================================================================
+# Global variables
+# =============================================================================
 # Cron patterns
 # +--------- Minute (0-59)                    | Output Dumper: >/dev/null 2>&1
 # | +------- Hour (0-23)                      | Multiple Values Use Commas: 3,12,47
@@ -19,9 +20,21 @@ cron_weekly="30 2 * * 6"                # Every Saturday at 02:30
 # Speedtest
 speedtest="http://speedtest.wdc01.softlayer.com/downloads/test500.zip"
 
+# =============================================================================
+# Setup checks
+# =============================================================================
+# Check if there is a rsyncd user
+if ! id -u rsyncd >/dev/null 2>&1; then
+   echo -e "There is no rsyncd user on this system, check the REAMDE.md for the required steps\n"
+   exit 1
+fi 
+
+# =============================================================================
+# Runtime checks
+# =============================================================================
 # Check for root
 if [ "$EUID" -ne 0 ]; then
-    echo -e "You must be root\n"
+    echo -e "You must be root"
     exit 1
 fi
 
@@ -51,6 +64,9 @@ if [ -z "${BACKUPPED_DIR_ROOT}" ] || [ -z "${BACKUP_DAEMON}" ]; then
     usage
 fi
 
+# =============================================================================
+# Functions
+# =============================================================================
 search_cronjob() {
     if $(crontab -u rsyncd -l | grep -qw "$1"); then
         # Already has a back-up
@@ -134,29 +150,32 @@ what_to_backup() {
     return 1
 } 
 
-# Install Trickle to manage our bandwidth
-if dpkg -l trickle > /dev/null; then
-    echo -e "You already have Trickle installed, awesome! Let's continue"
-else 
+install_trickle() {
     echo -e "We are going to install Trickle for you, this will let us truly limit our bandwidth speed"
     echo -en "Installing."
     apt-get update  > /dev/null
     echo -e "."
     apt-get install -y trickle > /dev/null
     echo -e "."
-fi
+}
 
+# =============================================================================
+# Main
+# =============================================================================
 run=0
 while [ "$run" -eq 0 ]; do
-	# Run the main thingy
-	if what_to_backup; then
-	   set_cronjob
-	   echo -en "Do you want to backup more? [y|N]: "
-	   read input; input="${input:=n}"
-	   if [ "$input" == "n" ]; then
-		run=1	
-	   fi
-	else 
-	    echo -e "You did something wrong!"
-	fi
+    # Install trickle
+    if ! dpkg -l trickle > /dev/null; then
+    	install_trickle 
+    fi
+    if what_to_backup; then
+       set_cronjob
+       echo -en "Do you want to backup more? [y|N]: "
+       read input; input="${input:=n}"
+       if [ "$input" == "n" ]; then
+	    run=1	
+       fi
+    else 
+	echo -e "You did something wrong!"
+    fi
 done

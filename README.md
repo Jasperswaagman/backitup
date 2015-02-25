@@ -14,16 +14,12 @@ sudo adduser rysncd
 After this, follow the steps of the **Foreach localhost** part of the [guide][guide]
 
 ## Usage
-### First use
-To make use of the script, one has to fill in these two variables:
+Running the script requires two options that are mandatory.
 ```bash
-BACKUPPED_DIR_ROOT=     # The directory which contains all the dirs/files you want to backup
-BACKUP_DAEMON=          # The server where you store your backups. Can be a host in the form of: host::module, host:/dir
-```
+Usage: ./backup.sh -d /your/dir -b host:module
 
-### Run it
-To run the script:
-```bash
-sudo ./backitup
+options:
+  -d directory which contains the files you want to backup
+  -b Server ip/domain where you want rsync to send the files to. for :module see 'man rsync'
 ```
 [guide]: http://mennucc1.debian.net/howto-ssh-rsyncd.html
