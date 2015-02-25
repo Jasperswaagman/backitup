@@ -4,10 +4,6 @@
 # Todo:
 #   * Make it iterative so users can add more cronjobs at once
 
-# The files/directories to backup
-BACKUPPED_DIR_ROOT=     # The directory which contains all the dirs/files you want to backup
-BACKUP_DAEMON=          # The server where you store your backups. Can be a host in the form of: host::module, host:/dir
-
 # Cron patterns
 # +--------- Minute (0-59)                    | Output Dumper: >/dev/null 2>&1
 # | +------- Hour (0-23)                      | Multiple Values Use Commas: 3,12,47
@@ -22,6 +18,31 @@ cron_weekly="30 2 * * 6"                # Every Saturday at 02:30
 
 # Speedtest
 speedtest="http://speedtest.wdc01.softlayer.com/downloads/test500.zip"
+
+# Check for root
+if [ "$EUID" -ne 0 ]; then
+    echo -e "You must be root\n"
+    exit 1
+fi
+
+usage() { 
+    echo "Usage: "$0" [-d </dir/which/containsthefilesyouwanttobackup>] [-b <host::module> | <host:/dir> (Server you want to backup to)]" 1>&2
+    exit 1;
+}
+
+while getopts ":d:b:" opts; do
+    case "$opts" in
+        d) 
+            BACKUPPED_DIR_ROOT="$OPTARG"     # The directory which contains all the dirs/files you want to backup
+            ;;
+        b)
+            BACKUP_DAEMON="$OPTARG"          # The server where you store your backups. Can be a host in the form of: host::module, host:/dir
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
 
 search_cronjob() {
     if $(crontab -l | grep -qw "$1"); then
@@ -101,17 +122,11 @@ what_to_backup() {
     return 1
 } 
 
-# Check for root
-if [ "$EUID" -ne 0 ]; then
-    echo -e "You must be root\n"
-    exit 1
-fi
-
 # Check if vars are set. (Perhaps make this interactive?)
-if [[ "$BACKUPPED_DIR_ROOT" == "" ]] || [[ "$BACKUP_DAEMON" == "" ]]; then
-    echo -e "To make use of this script you have to set the following variables, BACKUPPED_DIR_ROOT and BACKUP_DAEMON"
-    exit
-fi
+#if [[ "$BACKUPPED_DIR_ROOT" == "" ]] || [[ "$BACKUP_DAEMON" == "" ]]; then
+#    echo -e "To make use of this script you have to set the following variables, BACKUPPED_DIR_ROOT and BACKUP_DAEMON"
+#    exit
+#fi
 
 # Install Trickle to manage our bandwidth
 if dpkg -l trickle > /dev/null; then
