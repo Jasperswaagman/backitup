@@ -27,7 +27,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 usage() { 
-    echo -e "Usage: "$0" -d /your/dir -b host:module\n\noptions:\n  -d directory which contains the files you want to backup\n  -b Server ip/domain where you want rsync to send the files to. for :module see 'man rsync'" 1>&2
+    echo -e "Usage: "$0" -d /your/dir -b host::module/path\n\noptions:\n  -d directory which contains the files you want to backup\n  -b Server ip/domain where you want rsync to send the files to. for ::module see 'man rsync'" 1>&2
     exit 1;
 }
 
@@ -38,7 +38,7 @@ while getopts ":d:b:" opts; do
             BACKUPPED_DIR_ROOT=${OPTARG}
 	    ;;
         b)
-	    # The server where you store your backups. Can be a host in the form of: host::module, host:/dir
+	    # The server where you store your backups. Can be a host in the form of: host::module/path, host:/dir
             BACKUP_DAEMON=${OPTARG}            
 	    ;;
         *)
@@ -93,7 +93,7 @@ set_cronjob() {
     set_bandwidth
     echo -e "Creating cronjob for: ""$dir_to_backup"
     crontab -u rsyncd -l > /tmp/mycron
-    echo "$cron_time" "rsync -zav -e '"trickle -d "$bandwidth" ssh"' -e '"ssh -l rsyncd -i /home/rsyncd/.ssh/id_rsa"' "$BACKUPPED_DIR_ROOT""$dir_to_backup" "$BACKUP_DAEMON" | logger -t BACKUP" >> /tmp/mycron
+    echo "$cron_time" "rsync -zav -e '"trickle -d "$bandwidth" ssh"' -e '"ssh -l rsyncd -i /home/rsyncd/.ssh/id_rsa"' "$BACKUPPED_DIR_ROOT""$dir_to_backup" "$BACKUP_DAEMON"/"$HOSTNAME" | logger -t BACKUP" >> /tmp/mycron
     if crontab -u rsyncd /tmp/mycron; then
         echo -e "Cronjob added!"
     else 
