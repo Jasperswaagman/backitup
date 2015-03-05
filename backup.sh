@@ -5,18 +5,6 @@
 # =============================================================================
 # Global variables
 # =============================================================================
-# Cron patterns
-# +--------- Minute (0-59)                    | Output Dumper: >/dev/null 2>&1
-# | +------- Hour (0-23)                      | Multiple Values Use Commas: 3,12,47
-# | | +----- Day Of Month (1-31)              | Do every X intervals: */X  -> Example: */15 * * * *  Is every 15 minutes
-# | | | +--- Month (1 -12)                    | Aliases: @reboot -> Run once at startup; @hourly -> 0 * * * *;
-# | | | | +- Day Of Week (0-6) (Sunday = 0)   | @daily -> 0 0 * * *; @weekly -> 0 0 * * 0; @monthly ->0 0 1 * *;
-# | | | | |                                   | @yearly -> 0 0 1 1 *; # * * * * *
-# * * * * *
-cron_daily="30 2 * * *"                 # Every day at 02:30
-cron_every_other_day="30 2 1-31/2 * *"  # Every other day at 02:30
-cron_weekly="30 2 * * 6"                # Every Saturday at 02:30
-
 # Speedtest
 speedtest="http://speedtest.wdc01.softlayer.com/downloads/test500.zip"
 
@@ -67,6 +55,14 @@ fi
 # =============================================================================
 # Functions
 # =============================================================================
+get_crontimer() {
+    minute=$(grep -m1 -ao '[0-9]' /dev/urandom | sed s/0/10/ | head -n1)
+    hour=$(grep -m1 -ao '[1-4]' /dev/urandom | head -n1)
+    cron_daily=""$minute" "$hour" * * *"                 # Every day at 01-04:01-10 hour
+    cron_every_other_day=""$minute" "$hour" 1-31/2 * *"  # Every other day at 01-04:01-10 hour
+    cron_weekly=""$minute" "$hour" * * 6"                # Every Saturday at 01-04:01-10 hour
+}
+
 search_cronjob() {
     if $(crontab -u rsyncd -l | grep -qw "$1"); then
         # Already has a back-up
@@ -135,6 +131,7 @@ what_to_backup() {
     echo -en "\n[0] - Every day\n[1] - Every other day\n[2] - Every saturday\nHow often do you want it to back-up [0]: "
     read timesneeded; timesneeded="${timesneeded:=0}"
 
+    get_crontimer
     if [ "$timesneeded" == "0" ]; then
         cron_time="$cron_daily"
         return 0
@@ -164,17 +161,17 @@ install_trickle() {
 # =============================================================================
 run=0
 while [ "$run" -eq 0 ]; do
-    # Install trickle
+    # Install trickle if needed
     if ! dpkg -l trickle > /dev/null; then
     	install_trickle 
     fi
     if what_to_backup; then
-       set_cronjob
-       echo -en "Do you want to backup more? [y|N]: "
-       read input; input="${input:=n}"
-       if [ "$input" == "n" ]; then
-	    run=1	
-       fi
+        set_cronjob
+        echo -en "Do you want to backup more? [y/N]: "
+        read input; input="${input:=n}"
+        if [ "$input" == "n" ]; then
+            run=1	
+        fi
     else 
 	echo -e "You did something wrong!"
     fi
