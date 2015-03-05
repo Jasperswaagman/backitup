@@ -11,7 +11,7 @@ To make this user:
 ```bash
 sudo adduser rysncd && sudo ssh-keygen -f /home/rsyncd/.ssh/rsyncd && sudo cat /home/rsyncd/.ssh/rsyncd
 ```
-After this, add the paste public key to your server's authorized_keys file. ([guide][guide])
+After this, add the echoed public key to your server's authorized_keys file ([guide][guide]).
 
 ## Usage
 Running the script requires two options that are mandatory.
