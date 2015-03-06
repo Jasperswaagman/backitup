@@ -55,6 +55,13 @@ fi
 # =============================================================================
 # Functions
 # =============================================================================
+set_known_host() {
+    known_host=$(echo "$BACKUP_DAEMON" | perl -wnE 'say /^.*?(?=:)/g')
+    if [[ -z $(ssh-keygen -H -F "$known_host") ]]; then
+        ssh-keyscan -H "$known_host" >> /home/rsyncd/.ssh/known_hosts
+    fi
+}
+
 get_crontimer() {
     minute=$(grep -m1 -ao '[0-9]' /dev/urandom | sed s/0/10/ | head -n1)
     hour=$(grep -m1 -ao '[1-4]' /dev/urandom | head -n1)
@@ -166,6 +173,7 @@ while [ "$run" -eq 0 ]; do
     	install_trickle 
     fi
     if what_to_backup; then
+        set_known_host
         set_cronjob
         echo -en "Do you want to backup more? [y/N]: "
         read input; input="${input:=n}"
