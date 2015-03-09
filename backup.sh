@@ -27,7 +27,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 usage() { 
-    echo -e "Usage: "$0" -d /your/dir -b host::module/path\n\noptions:\n  -d directory which contains the files you want to backup\n  -b Server ip/domain where you want rsync to send the files to. for ::module see 'man rsync'" 1>&2
+    echo -e "Usage: "$0" -d /your/dir/ -b host::module/path\n\noptions:\n  -d directory which contains the files you want to backup (Mark the trailing slash!)\n  -b Server ip/domain where you want rsync to send the files to. for ::module see 'man rsync'" 1>&2
     exit 1;
 }
 
@@ -98,7 +98,7 @@ set_bandwidth() {
 
 set_cronjob() {
     set_bandwidth
-    echo -e "Creating cronjob for: ""$dir_to_backup"
+    echo -e "Creating cronjob for: ""$BACKUPPED_DIR_ROOT""$dir_to_backup"
     crontab -u rsyncd -l > /tmp/mycron
     echo "$cron_time" "rsync -zahv -e '"trickle -d "$bandwidth" ssh"' -e '"ssh -l rsyncd -i /home/rsyncd/.ssh/rsyncd"' "$BACKUPPED_DIR_ROOT""$dir_to_backup" "$BACKUP_DAEMON"/"$HOSTNAME" | logger -t BACKUP" >> /tmp/mycron
     if crontab -u rsyncd /tmp/mycron; then
