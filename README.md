@@ -7,9 +7,9 @@ Follow the steps under **Prepare serverhost** of the mentioned [guide][guide]
 
 ## Client prerequisites
 The script assumes there is an rsyncd user on the host of which you want to backup things.
-To make this user:
+To make this user, run:
 ```bash
-sudo adduser rsyncd && sudo mkdir /home/rsyncd/.ssh && sudo ssh-keygen -f /home/rsyncd/.ssh/rsyncd && sudo chown -R rsyncd /home/rsyncd/.ssh/ && sudo cat /home/rsyncd/.ssh/rsyncd.pub
+./prep_client.sh
 ```
 After this, add the echoed public key to your server's authorized_keys file ([guide][guide]).
 
