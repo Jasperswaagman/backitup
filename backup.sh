@@ -100,7 +100,7 @@ set_cronjob() {
     set_bandwidth
     echo -e "Creating cronjob for: ""$dir_to_backup"
     crontab -u rsyncd -l > /tmp/mycron
-    echo "$cron_time" "rsync -zah --info=STATS -e '"trickle -d "$bandwidth" ssh"' -e '"ssh -l rsyncd -i /home/rsyncd/.ssh/rsyncd"' "$BACKUPPED_DIR_ROOT""$dir_to_backup" "$BACKUP_DAEMON"/"$HOSTNAME" | logger -t BACKUP" >> /tmp/mycron
+    echo "$cron_time" "rsync -zahv -e '"trickle -d "$bandwidth" ssh"' -e '"ssh -l rsyncd -i /home/rsyncd/.ssh/rsyncd"' "$BACKUPPED_DIR_ROOT""$dir_to_backup" "$BACKUP_DAEMON"/"$HOSTNAME" | logger -t BACKUP" >> /tmp/mycron
     if crontab -u rsyncd /tmp/mycron; then
         echo -e "Cronjob added!"
     else 
