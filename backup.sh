@@ -57,7 +57,7 @@ fi
 # =============================================================================
 set_known_host() {
     known_host=$(echo "$BACKUP_DAEMON" | perl -wnE 'say /^.*?(?=:)/g')
-    if [[ -z $(ssh-keygen -H -F "$known_host") ]]; then
+    if [[ -z $(sudo -u rsyncd ssh-keygen -H -F "$known_host") ]]; then
         ssh-keyscan -H "$known_host" >> /home/rsyncd/.ssh/known_hosts
     fi
 }
