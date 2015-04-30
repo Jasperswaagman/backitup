@@ -11,9 +11,9 @@ speedtest="http://speedtest.wdc01.softlayer.com/downloads/test500.zip"
 # =============================================================================
 # Setup checks
 # =============================================================================
-# Check if there is a rsyncd user
-if ! id -u rsyncd >/dev/null 2>&1; then
-   echo -e "There is no rsyncd user on this system, check the REAMDE.md for the required steps\n"
+# Check if there is a ci user
+if ! id -u ci >/dev/null 2>&1; then
+   echo -e "There is no ci user on this system, check the REAMDE.md for the required steps\n"
    exit 1
 fi 
 
@@ -57,8 +57,8 @@ fi
 # =============================================================================
 set_known_host() {
     known_host=$(echo "$BACKUP_DAEMON" | perl -wnE 'say /^.*?(?=:)/g')
-    if [[ -z $(sudo -u rsyncd ssh-keygen -H -F "$known_host") ]]; then
-        ssh-keyscan -H "$known_host" >> /home/rsyncd/.ssh/known_hosts
+    if [[ -z $(sudo -u ci ssh-keygen -H -F "$known_host") ]]; then
+        ssh-keyscan -H "$known_host" >> /home/ci/.ssh/known_hosts
     fi
 }
 
@@ -71,16 +71,16 @@ get_crontimer() {
 }
 
 search_cronjob() {
-    if $(crontab -u rsyncd -l | grep -qw "$1"); then
+    if $(crontab -u ci -l | grep -qw "$1"); then
         # Already has a back-up
         return 1
     fi
 }
 
 new_crontab() {
-    if $(! crontab -u rsyncd -l); then
+    if $(! crontab -u ci -l); then
         export EDITOR=vi
-        crontab -u rsyncd -e << EOF
+        crontab -u ci -e << EOF
             dG:wq!
 EOF
     fi
@@ -99,9 +99,9 @@ set_bandwidth() {
 set_cronjob() {
     set_bandwidth
     echo -e "Creating cronjob for: ""$BACKUPPED_DIR_ROOT""$dir_to_backup"
-    crontab -u rsyncd -l > /tmp/mycron
-    echo "$cron_time" "rsync -zahv -e '"trickle -d "$bandwidth" ssh"' -e '"ssh -l rsyncd -i /home/rsyncd/.ssh/rsyncd"' "$BACKUPPED_DIR_ROOT""$dir_to_backup" "$BACKUP_DAEMON"/"$HOSTNAME" | logger -t BACKUP" >> /tmp/mycron
-    if crontab -u rsyncd /tmp/mycron; then
+    crontab -u ci -l > /tmp/mycron
+    echo "$cron_time" "rsync -zahv -e '"trickle -d "$bandwidth" ssh"' -e '"ssh -l ci -i /home/ci/.ssh/ci"' "$BACKUPPED_DIR_ROOT""$dir_to_backup" "$BACKUP_DAEMON"/"$HOSTNAME" | logger -t BACKUP" >> /tmp/mycron
+    if crontab -u ci /tmp/mycron; then
         echo -e "Cronjob added!"
     else 
         echo -e "Could not create cronjob"
