@@ -1,8 +1,4 @@
 #!/bin/bash
-if ! id -u ci >/dev/null 2>&1; then
-   echo -e "There is no ci user on this system, check the REAMDE.md for the required steps\n"
-   exit 1
-fi
 ci_home=/home/ci/
 
 sudo adduser ci \
