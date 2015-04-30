@@ -6,7 +6,7 @@ This script lets you make cronjobs which will rsync specific files/dir to your b
 Follow the steps under **Prepare serverhost** of the mentioned [guide][guide]
 
 ## Client prerequisites
-The script assumes there is an ci user on the host of which you want to backup things.
+The script assumes there is an rsyncd user on the host of which you want to backup things.
 To make this user, run:
 ```bash
 ./prep_client.sh

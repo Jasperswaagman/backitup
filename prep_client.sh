@@ -1,9 +1,9 @@
 #!/bin/bash
-ci_home=/home/ci/
+rsyncd_home=/home/rsyncd/
 
-sudo adduser ci \
-    && sudo mkdir "$ci_home".ssh \
-    && sudo ssh-keygen -f "$ci_home".ssh/id_rsa \
-    && sudo chown -R ci "$ci_home".ssh/ \
+sudo adduser rsyncd \
+    && sudo mkdir "$rsyncd_home".ssh \
+    && sudo ssh-keygen -f "$rsyncd_home".ssh/id_rsa \
+    && sudo chown -R rsyncd "$rsyncd_home".ssh/ \
     && echo -e "\nCopy this to your authorized_keys file on the rsync daemon:" \
-    && sudo cat "$ci_home".ssh/id_rsa.pub
+    && sudo cat "$rsyncd_home".ssh/id_rsa.pub
