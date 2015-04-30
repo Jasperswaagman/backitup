@@ -16,10 +16,10 @@ After this, add the echoed public key to your server's authorized_keys file ([gu
 ## Usage
 Running the script requires two options that are mandatory.
 ```bash
-Usage: ./backup.sh -d /your/dir -b host::module
+Usage: ./backup.sh -d /your/dir/ -b host::module
 
 options:
-  -d directory which contains the files you want to backup
+  -d directory which contains the files you want to backup (Mark the trailing slash!)
   -b Server ip/domain where you want rsync to send the files to. for ::module see 'man rsync'
 ```
 [guide]: http://mennucc1.debian.net/howto-ssh-rsyncd.html
