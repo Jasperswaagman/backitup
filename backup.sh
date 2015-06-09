@@ -58,6 +58,7 @@ fi
 set_known_host() {
     known_host=$(echo "$BACKUP_DAEMON" | perl -wnE 'say /^.*?(?=:)/g')
     if [[ -z $(sudo -u rsyncd ssh-keygen -H -F "$known_host") ]]; then
+        touch /home/rsyncd/.ssh/known_hosts
         ssh-keyscan -t rsa "$known_host" >> /home/rsyncd/.ssh/known_hosts
         sudo chown rsyncd:rsyncd -R /home/rsyncd/.ssh
     fi
